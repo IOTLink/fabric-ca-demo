@@ -1,0 +1,48 @@
+#
+# Copyright SecureKey Technologies Inc. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+default:
+  tcertbatch: 200
+  logginglevel: info
+  keystorepath: msp
+
+security:
+    crypto1:
+      enabled: true
+      hashAlgorithm: "SHA2"
+      level: 256
+    crypto2:
+      enabled: true
+      hashAlgorithm: "SHA2"
+      level: 256
+    crypto3:
+      enabled: true
+      hashAlgorithm: "SHA2"
+      level: 256
+
+
+organizations:
+    caorg1:
+      mspID: "Org1MSP"
+      # TLS secured connections with the CA
+      tlsEnabled: false
+      # CA name
+      name: "ca-org1"
+      serverURL:  "http://192.168.1.110:7054"
+      # Comma-Separated list of paths
+      tlscertfiles : "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/ca/ca_root.pem"
+      tlskeyfile: "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/client/client_client1-key.pem"
+      tlscertfile: "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/client/client_client1.pem"
+    caorg2:
+      mspID: "Org2MSP"
+      # TLS secured connections with the CA
+      tlsEnabled: false
+      # CA name
+      name: "ca-org2"
+      serverURL:  "http://192.168.1.110:7054"
+      # Comma-Separated list of paths
+      tlscertfiles : "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/ca/ca_root.pem"
+      tlskeyfile: "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/client/client_client1-key.pem"
+      tlscertfile: "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/client/client_client1.pem"

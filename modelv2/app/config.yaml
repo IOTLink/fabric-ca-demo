@@ -1,0 +1,56 @@
+#
+# Copyright SecureKey Technologies Inc. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+client:
+ security:
+  enabled: true
+  hashAlgorithm: "SHA2"
+  level: 256
+
+ tcert:
+  batch:
+    size: 200
+
+ logging:
+  level: info
+
+ keystore:
+  path: msp
+
+
+# network provides a static definition of a Hyperledger Fabric network
+ network:
+  organizations:
+    peerorg1:
+      # Membership Service Provider ID for this organization
+      mspID: "Org1MSP"
+      # CA config defines the fabric-ca instance that issues identities for this org
+      ca:
+       # TLS secured connections with the CA
+       tlsEnabled: false
+       # CA name
+       name: "ca-org1"
+       # CA URL. Note: https prefix required for TLS
+       serverURL:  "http://10.10.1.203:7054"
+       # Configuration for mutual TLS with the CA
+       tls:
+        # Comma-Separated list of paths
+        certfiles : "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/ca/ca_root.pem"
+        client:
+         keyfile: "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/client/client_client1-key.pem"
+         certfile: "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/client/client_client1.pem"
+
+    peerorg2:
+      mspID: "Org2MSP"
+      ca:
+       tlsEnabled: false
+       name: "ca-org2"
+       serverURL: "http://47.92.73.251:7054"
+       tls:
+        # Comma-Separated list of paths
+        certfiles : "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/ca/ca_root.pem"
+        client:
+         keyfile: "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/client/client_client1-key.pem"
+         certfile: "$GOPATH/src/github.com/hyperledger/fabric-sdk-go/test/fixtures/tls/fabricca/client/client_client1.pem"

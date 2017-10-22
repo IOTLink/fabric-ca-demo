@@ -1,0 +1,31 @@
+测试文件夹　文件越多是不是　
+files, _ := ioutil.ReadDir(ks.path)  处理文件越慢　？？测试
+
+
+
+func (ks *fileBasedKeyStore) GetKey(ski []byte) (k bccsp.Key, err error) {
+	// Validate arguments
+	if len(ski) == 0 {
+		return nil, errors.New("Invalid SKI. Cannot be of zero length.")
+	}
+
+
+	suffix := ks.getSuffix(hex.EncodeToString(ski))
+
+func (ks *fileBasedKeyStore) getSuffix(alias string) string {
+	files, _ := ioutil.ReadDir(ks.path)
+	for _, f := range files {
+		if strings.HasPrefix(f.Name(), alias) {
+			if strings.HasSuffix(f.Name(), "sk") {
+				return "sk"
+			}
+			if strings.HasSuffix(f.Name(), "pk") {
+				return "pk"
+			}
+			if strings.HasSuffix(f.Name(), "key") {
+				return "key"
+			}
+			break
+		}
+	}
+	return ""
