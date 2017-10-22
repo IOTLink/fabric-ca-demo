@@ -15,8 +15,8 @@ security:
       level: 256
     crypto2:
       enabled: true
-      hashAlgorithm: "SHA2"
-      level: 256
+      hashAlgorithm: "SHA1"
+      level: 512
     crypto3:
       enabled: true
       hashAlgorithm: "SHA2"
