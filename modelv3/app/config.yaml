@@ -34,7 +34,7 @@ client:
        name: "ca-org1"
        # CA URL. Note: https prefix required for TLS
        #serverURL:  "http://10.10.1.203:7054"
-       serverURL:  "http://192.168.1.110:7054"
+       serverURL:  "http://192.168.1.194:7054"
        # Configuration for mutual TLS with the CA
        tls:
         # Comma-Separated list of paths

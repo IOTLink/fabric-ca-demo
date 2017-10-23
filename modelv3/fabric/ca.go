@@ -187,3 +187,51 @@ func (c *CA)RegisterAndEnrollUser(appid string, appkey string, affiliation strin
 
 	return ekey.SKI(), ecert, nil
 }
+
+
+func (c *CA)Register(appid string, appkey string, affiliation string) (string, error){
+
+	if appid == "" || appkey == "" ||  c.CaConfig == nil ||  c.CaConfig.Name == "" {
+		return "", errors.New("Parameter can not be empty")
+	}
+	// Register a random user
+	registerRequest := ca.RegistrationRequest{
+		Name:        appid,
+		Secret:      appkey,
+		Type:        "user",
+		//Affiliation: "org2.department1"
+		//Affiliation: "org1.department1",
+		Affiliation: affiliation,
+		CAName:      c.CaConfig.Name,
+	}
+	enrolmentSecret, err := c.CaService.Register(c.AdminUser, &registerRequest)
+	if err != nil {
+		log.Fatalf("Error from Register: %s", err)
+		return "", err
+	}
+	fmt.Printf("Registered User: %s, Secret: %s\n", appid, enrolmentSecret)
+	return enrolmentSecret, nil
+}
+
+func (c *CA)EnrollUser(appid string, enrolmentSecret string) ([]byte, []byte, error){
+	// Enrol the previously registered user
+	ekey, ecert, err := c.CaService.Enroll(appid, enrolmentSecret)
+	if err != nil {
+		log.Fatalf("Error enroling user: %s", err.Error())
+		return nil, nil, err
+	}
+	//enroll
+	fmt.Printf("** Attempt to enrolled user:  '%s'\n", appid)
+	//create new user object and set certificate and private key of the previously enrolled user
+	enrolleduser := identity.NewUser(appid, c.MspID)
+	enrolleduser.SetEnrollmentCertificate(ecert)
+	enrolleduser.SetPrivateKey(ekey)
+
+	err = c.Client.SaveUserToStateStore(enrolleduser, false)
+	if err != nil {
+		log.Fatalf("client.SaveUserToStateStore return error: %v", err)
+		return nil, nil, err
+	}
+
+	return ekey.SKI(), ecert, nil
+}
