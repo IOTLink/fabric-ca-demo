@@ -302,9 +302,6 @@ func (c *Config) DefaultConfigLevel() (string, error) {
 }
 
 
-
-
-
 // CSPConfig ...
 func (c *Config) CSPConfig(crypto string) *bccspFactory.FactoryOpts {
 	var err error

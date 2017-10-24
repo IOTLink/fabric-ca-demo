@@ -235,3 +235,84 @@ func (c *CA)EnrollUser(appid string, enrolmentSecret string) ([]byte, []byte, er
 
 	return ekey.SKI(), ecert, nil
 }
+
+
+
+func (c *CA)RegisterClient(appid string, appkey string, affiliation string) (string, error){
+
+	if appid == "" || appkey == "" ||  c.CaConfig == nil ||  c.CaConfig.Name == "" {
+		return "", errors.New("Parameter can not be empty")
+	}
+	// Register a random user
+	registerRequest := ca.RegistrationRequest{
+		Name:        appid,
+		Secret:      appkey,
+		Type:        "user",//"client", //"user" // 修改为clietn或者user不影响
+		//Affiliation: "org2.department1"
+		//Affiliation: "org1.department1",
+		Attributes:  []ca.Attribute{{"hf.Registrar.Roles","client,user,peer,validator,auditor"}}, //只有client权限的用户，才可以作为amdin用户给洽谈用户申请证书
+		Affiliation: affiliation,
+
+		CAName:      c.CaConfig.Name,
+	}
+	enrolmentSecret, err := c.CaService.Register(c.AdminUser, &registerRequest)
+	if err != nil {
+		log.Fatalf("Error from Register: %s", err)
+		return "", err
+	}
+	fmt.Printf("Registered User: %s, Secret: %s\n", appid, enrolmentSecret)
+	return enrolmentSecret, nil
+}
+
+
+func (c *CA)InitCaServerOtherUser(preuser string, orgId string, enroll_user_dir string) error {
+	var err error
+	c.OrgId = orgId
+	c.MspID, err = allFabricCAConfig.MspID(orgId)
+	if err != nil {
+		log.Println("MspID() returned error: %v,%s", err, orgId)
+	}
+	log.Println("InitCaServer MspID:", c.OrgId)
+
+	c.CaConfig, err = allFabricCAConfig.CAConfig(orgId)
+	if err != nil {
+		log.Println("GetCAConfig returned error: %s", err)
+		return err
+	}
+	c.Client = client.NewClient(allFabricCAConfig)
+
+	err = bccspFactory.InitFactories(allFabricCAConfig.CSPConfig())
+	if err != nil {
+
+		log.Println("Failed getting ephemeral software-based BCCSP [%s]", err)
+		return err
+	}
+
+	cryptoSuite := bccspFactory.GetDefault()
+
+	c.Client.SetCryptoSuite(cryptoSuite)
+	//stateStore, err := kvs.CreateNewFileKeyValueStore("enroll_user") //Path: "enroll_user"
+	stateStore, err := kvs.CreateNewFileKeyValueStore(enroll_user_dir)
+	if err != nil {
+		log.Println("CreateNewFileKeyValueStore return error[%s]", err)
+		return err
+	}
+	c.Client.SetStateStore(stateStore)
+
+	c.CaService, err = fabricCAClient.NewFabricCAClient(allFabricCAConfig, orgId)
+	if err != nil {
+		log.Println("NewFabricCAClient return error: %v", err)
+		return err
+	}
+
+	// Admin user is used to register, enrol and revoke a test user
+	c.AdminUser, err = c.Client.LoadUserFromStateStore(preuser)
+	if err != nil {
+		log.Println("client.LoadUserFromStateStore return error: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+

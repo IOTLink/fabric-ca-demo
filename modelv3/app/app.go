@@ -120,6 +120,104 @@ func ca_register_enroll() {
 	}
 }
 
+func ca_register_enroll2() {
+	InitCA("config.yaml")
+	myca := new(CA)
+	err := myca.InitCaServer("peerorg1", "enroll_user_peerorg2")
+	if err != nil {
+		log.Fatalf("Init CA FAILT: ",err.Error())
+	} else {
+		fmt.Println("Init CA SUCCESS")
+	}
+
+	userNameA := "lhy9"
+	secret := "passwd"
+
+	secret,err = myca.Register(userNameA,"passwd","org2.department1") //只能一次
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	//return
+	//for i:=0;i<10;i++
+
+	secret = "passwd222"
+	_, _, err = myca.EnrollUser(userNameA,secret)//可以多次
+	if err != nil {
+		fmt.Println("RegisterAndEnrollUser FAILT",err)
+		return
+	} else {
+		fmt.Println("RegisterAndEnrollUser User",userNameA)
+	}
+}
+
+const g_admin = "admin13"
+
+func ca_register_enroll3() {
+	fmt.Println("_____________________ca_register_enroll3___________________")
+	InitCA("config.yaml")
+	myca := new(CA)
+	err := myca.InitCaServer("peerorg1", "enroll_user_peerorg2")
+	if err != nil {
+		log.Fatalf("Init CA FAILT: ",err.Error())
+	} else {
+		fmt.Println("Init CA SUCCESS")
+	}
+
+	userNameA := g_admin
+	secret := "passwd"
+
+	secret,err = myca.RegisterClient(userNameA,secret,"org2.department1") //只能一次
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	//return
+	//for i:=0;i<10;i++
+	_, _, err = myca.EnrollUser(userNameA,secret)//可以多次
+	if err != nil {
+		fmt.Println("RegisterAndEnrollUser FAILT",err)
+		return
+	} else {
+		fmt.Println("RegisterAndEnrollUser User",userNameA)
+	}
+}
+
+
+func ca_register_enroll4() {
+	fmt.Println("_____________________ca_register_enroll4__________________")
+	InitCA("config.yaml")
+	myca := new(CA)
+	err := myca.InitCaServerOtherUser(g_admin,"peerorg1", "enroll_user_peerorg2")
+	if err != nil {
+		log.Fatalf("Init CA FAILT: ",err.Error())
+	} else {
+		fmt.Println("Init CA SUCCESS")
+	}
+
+	userNameA := "otheruser1"
+	secret := "passwd"
+
+	secret,err = myca.Register(userNameA,"passwd","org2.department1") //只能一次
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	//return
+	//for i:=0;i<10;i++
+	_, _, err = myca.EnrollUser(userNameA,secret)//可以多次
+	if err != nil {
+		fmt.Println("RegisterAndEnrollUser FAILT",err)
+		return
+	} else {
+		fmt.Println("RegisterAndEnrollUser User",userNameA)
+	}
+
+}
+
 /*
 同一个用户名　和密码：
 2017/10/23 21:04:58 Error from Register: Error Registering User: Error response from server was: Identity 'lhy2' is already registered
@@ -139,13 +237,18 @@ ca-server 配置不存在org2.department2
 数据库user表　state记录申请了多少次：
 Error enroling user: Enroll failed: Error response from server was: Authorization failure
 
+Register正常 EnrollUser用户使用其他密码：
+Error enroling user: Enroll failed: Error response from server was: Authorization failure
+
 
  */
 func main() {
 	//ca_org1()
 	//ca_org2()
 	//ca_map()
-	ca_register_enroll()
-
+	//ca_register_enroll()
+	//ca_register_enroll2()
+	ca_register_enroll3()
+	ca_register_enroll4()
 }
 
