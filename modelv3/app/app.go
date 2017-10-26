@@ -1,10 +1,10 @@
 package main
 
 import (
-. "fabric-ca-demo/modelv3/fabric"
-"log"
-"fmt"
-)
+	. "fabric-ca-demo/modelv3/fabric"
+	"log"
+	"fmt"
+	)
 
 
 func ca_org1() {
@@ -152,7 +152,7 @@ func ca_register_enroll2() {
 	}
 }
 
-const g_admin = "admin13"
+const g_admin = "admin19"
 
 func ca_register_enroll3() {
 	fmt.Println("_____________________ca_register_enroll3___________________")
@@ -190,14 +190,17 @@ func ca_register_enroll4() {
 	fmt.Println("_____________________ca_register_enroll4__________________")
 	InitCA("config.yaml")
 	myca := new(CA)
-	err := myca.InitCaServerOtherUser(g_admin,"peerorg1", "enroll_user_peerorg2")
+	err := myca.InitCaServerOtherUser(g_admin,"peerorg1", "enroll_use" +
+		"" +
+			"" +
+				"r_peerorg2")
 	if err != nil {
 		log.Fatalf("Init CA FAILT: ",err.Error())
 	} else {
 		fmt.Println("Init CA SUCCESS")
 	}
 
-	userNameA := "otheruser1"
+	userNameA := "otheruser"
 	secret := "passwd"
 
 	secret,err = myca.Register(userNameA,"passwd","org2.department1") //只能一次
@@ -216,6 +219,77 @@ func ca_register_enroll4() {
 		fmt.Println("RegisterAndEnrollUser User",userNameA)
 	}
 
+}
+
+
+func ca_register_enroll_reenroll_revoke() {
+	InitCA("config.yaml")
+	myca := new(CA)
+	err := myca.InitCaServer("peerorg1", "enroll_user_peerorg2")
+	if err != nil {
+		log.Fatalf("Init CA FAILT: ",err.Error())
+	} else {
+		fmt.Println("Init CA SUCCESS")
+	}
+
+	userNameA := "alice"
+	/*
+	secret := "passwd"
+
+	secret,err = myca.Register(userNameA,secret,"org2.department1") //只能一次
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+
+	_, _, err = myca.EnrollUser(userNameA,secret)//可以多次
+	if err != nil {
+		fmt.Println("RegisterAndEnrollUser FAILT",err)
+		return
+	} else {
+		fmt.Println("RegisterAndEnrollUser User",userNameA)
+	}
+
+	return
+
+	err = myca.ReenrollUser(userNameA)
+	if err != nil {
+		fmt.Println("ReenrollUser FAILT",err)
+		return
+	} else {
+		fmt.Println("ReenrollUser User",userNameA)
+	}
+	/*
+	只在certificates表增加证书文件
+	users 表没有变化
+	*/
+
+
+	//return
+
+	err = myca.RevokeUser(userNameA,"ca-org1")
+	if err != nil {
+		fmt.Println("RevokeUser FAILT",err)
+		return
+	} else {
+		fmt.Println("RevokeUser User",userNameA)
+	}
+
+	/*
+	-------
+	id              | alice
+	token           | \x24326124313024683750704c533754797071766c3056694f534e33612e59517130346a574e574859726e537451764643416a724767347266537a4a71
+	type            | user
+	affiliation     | org2.department1
+	attributes      | null
+	state           | -1
+	max_enrollments | -1
+
+	user标中的state值为-1 revock之后
+
+	user  certificates 数据表中的数据并没有删除
+	*/
 }
 
 /*
@@ -248,7 +322,10 @@ func main() {
 	//ca_map()
 	//ca_register_enroll()
 	//ca_register_enroll2()
-	ca_register_enroll3()
-	ca_register_enroll4()
+
+	//ca_register_enroll3()
+	//ca_register_enroll4()
+
+	ca_register_enroll_reenroll_revoke()
 }
 

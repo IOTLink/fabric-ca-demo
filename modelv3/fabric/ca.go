@@ -15,6 +15,7 @@ import (
 	bccspFactory "github.com/hyperledger/fabric/bccsp/factory"
 	fabricCAClient "github.com/hyperledger/fabric-sdk-go/pkg/fabric-ca-client"
 	fab "github.com/hyperledger/fabric-sdk-go/api/apifabclient"
+	"bytes"
 )
 
 var allFabricCAConfig config.Config
@@ -315,4 +316,60 @@ func (c *CA)InitCaServerOtherUser(preuser string, orgId string, enroll_user_dir 
 	return nil
 }
 
+
+
+
+func (c *CA)LoadUser(appid string) (fab.User, error){
+	c.Client.SetUserContext(nil)
+	user, err := c.Client.LoadUserFromStateStore(appid)
+	if err != nil {
+		log.Fatalf("client.LoadUserFromStateStore return error: %v", err)
+		return nil,err
+	}
+	return user,nil
+}
+
+
+func (c *CA)ReenrollUser(username string) error{
+
+	enrolleduser, err := c.LoadUser(username)
+	if err != nil {
+		fmt.Sprintln(err.Error())
+	}
+
+	//reenroll
+	newprikey , reenrollCert, err := c.CaService.Reenroll(enrolleduser)
+	if err != nil {
+		log.Fatalf("Error Reenroling user: %s", err.Error())
+		return err
+	}
+	fmt.Printf("** User '%s' was re-enrolled \n", username)
+	ecert := enrolleduser.EnrollmentCertificate()
+	prikey := enrolleduser.PrivateKey()
+	if bytes.Equal(ecert, reenrollCert) {
+		log.Fatalf("Error Reenroling user. Enrollmet and Reenrollment certificates are the same.")
+	}
+	if prikey == newprikey {
+		fmt.Sprintln("same priKey")
+	}
+	return nil
+}
+
+func (c *CA) RevokeUser(username string,caname string)  error{
+
+
+	adminUser, err := c.LoadUser("admin")
+	if err != nil {
+		fmt.Sprintln(err.Error())
+	}
+
+
+	revokeRequest := ca.RevocationRequest{Name: username, CAName: caname}
+	err = c.CaService.Revoke(adminUser, &revokeRequest)
+	if err != nil {
+		log.Fatalf("Error from Revoke: %s", err)
+		return err
+	}
+	return nil
+}
 
